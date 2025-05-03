@@ -1,6 +1,6 @@
 package com.example.QuestionsGenerator;
 
-import com.example.QuestionsGenerator.WhatsApp.WhatsAppSender;
+import com.example.QuestionsGenerator.Notification.WhatsAppSender;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;

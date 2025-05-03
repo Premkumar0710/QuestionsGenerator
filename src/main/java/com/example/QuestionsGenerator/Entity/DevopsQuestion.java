@@ -3,12 +3,14 @@ package com.example.QuestionsGenerator.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Question {
+public class DevopsQuestion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,5 +21,11 @@ public class Question {
 
     private String difficulty; // e.g., Easy, Medium, Hard
 
-    private String qnType; // e.g., "SQL", "DSA"
+    private String tags; // e.g., Arrays, LinkedLists
+
+    private LocalDate createdAt;
+
+    private LocalDate updatedAt;
+
+    private String answer;
 }
