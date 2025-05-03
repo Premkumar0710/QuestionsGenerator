@@ -97,4 +97,5 @@ pipeline {
             bat "docker image prune -f"
         }
     }
+    
 }
