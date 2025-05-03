@@ -18,7 +18,7 @@ pipeline {
         stage('Check Commit Message Format') {
             steps {
                 script {
-                    def commitMessage = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+                    def commitMessage = bat(script: "git log -1 --pretty=%B", returnStdout: true).trim()
                     echo "Latest Commit Message: ${commitMessage}"
 
                     if (!commitMessage.matches("^(feat|fix|chore|docs|style|refactor|perf|test):\\d{4}-.+")) {
@@ -33,7 +33,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo '🏗️ Building your project...'
-                sh 'mvn clean install -DskipTests'
+                bat 'mvn clean install -DskipTests'
             }
         }
 
@@ -41,7 +41,7 @@ pipeline {
             steps {
                 script {
                     echo "🐳 Building Docker image ${DOCKER_IMAGE}:${DOCKER_TAG}..."
-                    sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                    bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
                 }
             }
         }
@@ -51,7 +51,7 @@ pipeline {
                 script {
                     echo "🧪 Testing Docker image..."
                     // Replace with actual test logic later, for now just check if container runs
-                    sh "docker run --rm ${DOCKER_IMAGE}:${DOCKER_TAG} echo '✅ Container ran successfully'"
+                    bat "docker run --rm ${DOCKER_IMAGE}:${DOCKER_TAG} echo '✅ Container ran successfully'"
                 }
             }
         }
@@ -61,8 +61,8 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         echo "🔐 Logging in and pushing Docker image to Docker Hub..."
-                        sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
-                        sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                        bat "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
+                        bat "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
                     }
                 }
             }
@@ -73,9 +73,9 @@ pipeline {
                 script {
                     echo "🚀 Deploying Docker container..."
                     // Stop and remove existing container if it exists
-                    sh "docker rm -f ${DOCKER_IMAGE}-${DOCKER_TAG} || true"
+                    bat "docker rm -f ${DOCKER_IMAGE}-${DOCKER_TAG} || true"
                     // Run new container
-                    sh "docker run -d --name ${DOCKER_IMAGE}-${DOCKER_TAG} -p 8080:8080 ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    bat "docker run -d --name ${DOCKER_IMAGE}-${DOCKER_TAG} -p 8080:8080 ${DOCKER_IMAGE}:${DOCKER_TAG}"
                 }
             }
         }
@@ -84,7 +84,7 @@ pipeline {
             steps {
                 script {
                     echo "🧹 Cleaning up Docker image..."
-                    sh "docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true"
+                    bat "docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true"
                 }
             }
         }
@@ -93,8 +93,8 @@ pipeline {
     post {
         always {
             echo "♻️ Post-cleanup steps..."
-            sh "docker container prune -f"
-            sh "docker image prune -f"
+            bat "docker container prune -f"
+            bat "docker image prune -f"
         }
     }
 }
