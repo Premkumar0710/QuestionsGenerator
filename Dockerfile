@@ -1,20 +1,24 @@
-# Use an official OpenJDK runtime as a parent image
-FROM openjdk:17-jdk-slim
+# Use an official Maven image to build the app
+FROM maven:3.8.4-openjdk-17 AS builder
 
-# Set the working directory in the container
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the local code to the container
-COPY . .
+# Copy the pom.xml and source code into the container
+COPY pom.xml .
+COPY src ./src
 
-# Install Maven (if necessary)
-RUN apt-get update && apt-get install -y maven
+# Build the app using Maven
+RUN mvn clean install -DskipTests
 
-# Build the application with Maven (use mvn clean install)
-RUN mvn clean install
+# Now use a smaller image to run the application
+FROM openjdk:17-jdk-slim
 
-# Expose the port that the app will run on
-EXPOSE 8080
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the built jar file from the builder image
+COPY --from=builder /app/target/QuestionsGenerator.jar .
 
 # Command to run the application
 CMD ["java", "-jar", "target/QuestionsGenerator.jar"]

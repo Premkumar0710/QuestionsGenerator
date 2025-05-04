@@ -21,7 +21,10 @@ pipeline {
                script {
                    // Safely retrieve the latest commit message line in Windows
                    def fullCommitLine = bat(
-                       script: '@echo off && for /f "delims=" %i in (\'git log -1 --pretty=oneline\') do @echo %i',
+                       script: '''
+                           @echo off
+                           for /f "delims=" %%i in ('git log -1 --pretty=oneline') do echo %%i
+                           ''',
                        returnStdout: true
                    ).trim()
 
