@@ -22,7 +22,9 @@ pipeline {
                     def fullCommitLine = bat(script: "git log -1 --pretty=oneline", returnStdout: true).trim()
                     def commitMessage = fullCommitLine.replaceFirst("^[a-fA-F0-9]+\\s+", "") // remove hash and space
 
-                    echo "Latest Commit Message: ${commitMessage}"
+                    // Print with markers to reveal any hidden characters
+                    echo "Raw Commit Message: >>>${commitMessage}<<<"
+                    echo "Length of Commit Message: ${commitMessage.length()}"
 
                     if (!commitMessage.matches("^(feat|fix|build|chore|docs|style|refactor|perf|test|ci|workflow|security|ui):\\d{4}-.+")) {
                         error("❌ Commit message does not follow required format: feat:0000-description")
@@ -32,6 +34,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Build') {
             steps {
