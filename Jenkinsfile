@@ -19,7 +19,8 @@ pipeline {
         stage('Check Commit Message Format') {
             steps {
                 script {
-                    def commitMessage = bat(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+                    def commitMessage = bat(script: "git log -1 --pretty=oneline", returnStdout: true).trim()
+
                     echo "Latest Commit Message: ${commitMessage}"
 
                     if (!commitMessage.matches("^(feat|fix|build|chore|docs|style|refactor|perf|test|ci|workflow|security|ui):\\d{4}-.+")) {
@@ -65,7 +66,7 @@ pipeline {
             steps {
                 script {
                     echo "🧪 Testing Docker image..."
-                    // Replace with actual test logic later, for now just check if the container runs
+                   // Replace with actual test logic later, for now just check if the container runs
                     bat "docker run --rm ${DOCKER_IMAGE}:${DOCKER_TAG} echo '✅ Container ran successfully'"
                 }
             }
