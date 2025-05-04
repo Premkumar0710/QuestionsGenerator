@@ -18,7 +18,7 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copy the built jar file from the builder image
-COPY --from=builder /app/target/QuestionsGenerator.jar .
+COPY --from=builder /app/target/QuestionsGenerator-0.0.1-SNAPSHOT.jar .
 
 # Command to run the application
 CMD ["java", "-jar", "target/QuestionsGenerator.jar"]
