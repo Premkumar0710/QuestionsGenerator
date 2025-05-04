@@ -22,7 +22,7 @@ pipeline {
                     def commitMessage = bat(script: "git log -1 --pretty=%B", returnStdout: true).trim()
                     echo "Latest Commit Message: ${commitMessage}"
 
-                    if (!commitMessage.matches("^(feat|fix|chore|docs|style|refactor|perf|test):\\d{4}-.+")) {
+                    if (!commitMessage.matches("^(feat|fix|build|chore|docs|style|refactor|perf|test|ci|workflow|security|ui):\\d{4}-.+")) {
                         error("❌ Commit message does not follow required format: feat:0000-description")
                     } else {
                         echo "✅ Commit message format is valid"
