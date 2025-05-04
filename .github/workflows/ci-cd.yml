@@ -5,7 +5,7 @@ on:
     branches:
       - master
       - develop
-      - feature-branch
+      - 'feature-*'  # Matches any feature branch like feature-login
 
 jobs:
   build-and-deploy:
@@ -26,14 +26,12 @@ jobs:
             echo "✅ Use format like: feat: add login functionality"
             exit 1
           fi
-          
           DESCRIPTION=$(echo "$COMMIT_MSG" | cut -d':' -f2- | xargs)
           if [[ -z "$DESCRIPTION" ]]; then
             echo "❌ Missing commit description after prefix."
             echo "✅ Use format like: feat: add login functionality"
             exit 1
           fi
-          
           echo "✅ Commit message is valid."
 
       # Set up Java 17
@@ -42,6 +40,15 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+
+      # Cache Maven dependencies
+      - name: 🧰 Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
 
       # Build the project using Maven
       - name: 🧪 Build with Maven
@@ -69,12 +76,18 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            # Stop and remove any running container with the same name
-            docker rm -f questions-generator || true
-            # Pull the latest Docker image from Docker Hub
+            # Pull latest Docker image
             docker pull ${{ secrets.DOCKER_USERNAME }}/questions-generator:latest
-            # Run the new container
-            docker run -d --name questions-generator -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/questions-generator:latest
+
+            # Stop and remove old container if exists
+            docker rm -f questions-generator || true
+
+            # Run the new container with auto-restart
+            docker run -d --name questions-generator --restart unless-stopped -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/questions-generator:latest
+
+            # (Optional) Clean up stopped containers and dangling images
+            docker container prune -f
+            docker image prune -f
 
       # Clean up local Docker images after the deployment
       - name: 🧹 Clean up local Docker

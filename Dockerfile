@@ -1,26 +1,26 @@
-# Use an official Maven image to build the app
-FROM maven:3.8.4-openjdk-17 AS builder
+# Use a Maven image to build the app
+FROM maven:3.8-openjdk-17 as builder
 
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the pom.xml and source code into the container
-COPY pom.xml .
-COPY src ./src
+# Copy your source code to the Docker image
+COPY . .
 
-# Build the app using Maven
+# Build the application with Maven
 RUN mvn clean install -DskipTests
 
-# Now use a smaller image to run the application
+# Check the files in the target directory
+RUN ls /app/target
+
+# Create a new stage for the final image
 FROM openjdk:17-jdk-slim
 
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the built jar file from the builder image
+# Copy the JAR file from the builder stage
 COPY --from=builder /app/target/QuestionsGenerator-0.0.1-SNAPSHOT.jar .
 
 # Command to run the application
-CMD ["java", "-jar", "target/QuestionsGenerator.jar"]
-
-
+ENTRYPOINT ["java", "-jar", "QuestionsGenerator-0.0.1-SNAPSHOT.jar"]
