@@ -16,30 +16,37 @@ pipeline {
             }
         }
 
-        stage('Check Commit Message Format') {
-            steps {
-                script {
-                    // This safely gets only the actual commit line (avoiding command prompt pollution in Windows)
-                    def fullCommitLine = bat(
-                        script: '@echo off && for /f "delims=" %%i in (\'git log -1 --pretty=oneline\') do @echo %%i',
-                        returnStdout: true
-                    ).trim()
+       stage('Check Commit Message Format') {
+           steps {
+               script {
+                   // Safely retrieve the latest commit message line in Windows
+                   def fullCommitLine = bat(
+                       script: '@echo off && for /f "delims=" %i in (\'git log -1 --pretty=oneline\') do @echo %i',
+                       returnStdout: true
+                   ).trim()
 
-                    // Remove the commit hash from the start of the line
-                    def commitMessage = fullCommitLine.replaceFirst("^[a-fA-F0-9]+\\s+", "")
+                   echo "Commit Line: ${fullCommitLine}"
 
-                    echo "Raw Commit Message: >>>${commitMessage}<<<"
-                    echo "Length of Commit Message: ${commitMessage.length()}"
+                   // Extract the commit message (everything after the first space)
+                   def matcher = fullCommitLine =~ /^[0-9a-f]{7,40}\s+(.*)/
+                   if (!matcher.matches()) {
+                       error "❌ Failed to parse commit message"
+                   }
+                   def commitMessage = matcher[0][1].trim()
 
-                    // Check against allowed types
-                    if (!commitMessage.matches("^(feat|fix|build|chore|docs|style|refactor|perf|test|ci|workflow|security|ui):\\d{4}-.+")) {
-                        error("❌ Commit message does not follow required format: feat:0000-description")
-                    } else {
-                        echo "✅ Commit message format is valid"
-                    }
-                }
-            }
-        }
+                   echo "Commit Message: ${commitMessage}"
+
+                   // Regex pattern to validate message (e.g., "fix:1234 - corrected spacing issue")
+                   def pattern = ~/^(feat|fix|chore|test):\d{4}-.*$/
+
+                   if (!(commitMessage ==~ pattern)) {
+                       error "❌ Invalid commit message format. Expected format: type:0000-message"
+                   } else {
+                       echo "✅ Commit message format is valid"
+                   }
+               }
+           }
+       }
 
 
         stage('Build') {
