@@ -66,7 +66,7 @@ pipeline {
             steps {
                 script {
                     echo "🧪 Testing Docker image..."
-                   // Replace with actual test logic later, for now just check if the container runs
+                    // Replace with actual test logic later, for now just check if the container runs
                     bat "docker run --rm ${DOCKER_IMAGE}:${DOCKER_TAG} echo '✅ Container ran successfully'"
                 }
             }
