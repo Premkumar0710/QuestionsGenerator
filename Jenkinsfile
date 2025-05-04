@@ -19,7 +19,8 @@ pipeline {
         stage('Check Commit Message Format') {
             steps {
                 script {
-                    def commitMessage = bat(script: "git log -1 --pretty=oneline", returnStdout: true).trim().replace('\r', '')
+                    def fullCommitLine = bat(script: "git log -1 --pretty=oneline", returnStdout: true).trim()
+                    def commitMessage = fullCommitLine.replaceFirst("^[a-fA-F0-9]+\\s+", "") // remove hash and space
 
                     echo "Latest Commit Message: ${commitMessage}"
 
