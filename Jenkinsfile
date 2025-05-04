@@ -4,13 +4,14 @@ pipeline {
     environment {
         DOCKER_IMAGE = "mprem799/questionsgenerator"
         DOCKER_TAG = "${env.BRANCH_NAME}-${env.BUILD_ID}"  // Unique tag using branch and build ID
+        NGROK_SCRIPT_PATH = "C:\\Prem\\Backend Projects\\QuestionsGenerator\\github-webhook.ps1"  // Path to ngrok script
     }
 
     stages {
         stage('Clone Repo') {
             steps {
                 script {
-                    checkout scm  // Automatically clones the repo for current branch
+                    checkout scm  // Automatically clones the repo for the current branch
                 }
             }
         }
@@ -37,6 +38,20 @@ pipeline {
             }
         }
 
+        stage('Start ngrok and Update GitHub Webhook') {
+            steps {
+                script {
+                    echo '🔄 Starting ngrok and updating GitHub Webhook...'
+                    // Run ngrok and update webhook with the new URL using PowerShell script
+                    bat 'start /B ngrok http 8080'  // Start ngrok in the background
+                    sleep(time: 15, unit: 'SECONDS') // Wait for ngrok to establish the tunnel
+
+                    // Run PowerShell script to update GitHub webhook with the ngrok URL
+                    bat "powershell.exe -ExecutionPolicy Bypass -File \"${env.NGROK_SCRIPT_PATH}\""
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 script {
@@ -50,7 +65,7 @@ pipeline {
             steps {
                 script {
                     echo "🧪 Testing Docker image..."
-                    // Replace with actual test logic later, for now just check if container runs
+                    // Replace with actual test logic later, for now just check if the container runs
                     bat "docker run --rm ${DOCKER_IMAGE}:${DOCKER_TAG} echo '✅ Container ran successfully'"
                 }
             }
@@ -97,5 +112,4 @@ pipeline {
             bat "docker image prune -f"
         }
     }
-    
 }
