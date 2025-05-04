@@ -7,7 +7,7 @@ WORKDIR /app
 # Copy your source code to the Docker image
 COPY . .
 
-# Build the application with Maven (skip tests for faster build)
+# Build the application with Maven (skip tests as of now for faster build)
 RUN mvn clean install -DskipTests
 
 # Create a new stage for the final runtime image
