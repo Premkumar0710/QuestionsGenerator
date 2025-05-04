@@ -19,7 +19,7 @@ pipeline {
         stage('Check Commit Message Format') {
             steps {
                 script {
-                    def commitMessage = bat(script: "git log -1 --pretty=oneline", returnStdout: true).trim()
+                    def commitMessage = bat(script: "git log -1 --pretty=oneline", returnStdout: true).trim().replace('\r', '')
 
                     echo "Latest Commit Message: ${commitMessage}"
 
